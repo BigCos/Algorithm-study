@@ -1,0 +1,165 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+
+public class Main{
+	static int exit_r, exit_c;
+	static int min;
+
+	static int direction[][] = {{-1,0}, {0,-1},{1,0}, {0,1}};
+	static Map<String, int[]> direct = new HashMap<String, int[]>(){
+		{
+			put("w",direction[0]);
+			put("a",direction[1]);
+			put("s",direction[2]);
+			put("d",direction[3]);
+			
+		}
+	};
+	
+	
+	private static class Point
+		private int r;
+		private int c;
+	    private Point nextP;
+
+		public Point(int r, int c){
+			this.r = r;
+			this.c = c;
+		}
+
+		public Boolean equals(Point p){
+			if(this.r == p.r && this.c == p.c){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		
+	}
+
+  
+	private static Boolean findNextP(Point p, String d, Character[][] maze){
+		int r = p.r;
+		int c = p.c;
+		int moveR = direct.get(d)[0];
+		int moveC = direct.get(d)[1];
+
+		while(maze[r+moveR][c+moveC] !='#'){
+			if (maze[r+moveR][c+moveC] == 'O') { 
+				p.nextP = new Point(r+moveR,c+moveC);
+				return true;
+			}
+			r+=moveR; c+=moveC;
+
+		}
+		p.nextP = new Point(r, c);
+		return false;
+		
+	}
+
+	
+
+	private static void link(Point red, Point blue, String preD, int i,Character[][] maze){
+		List<String> currentD = new ArrayList<String>(){{
+			add("w");
+			add("a");
+			add("s");
+			add("d");
+		}};
+
+		if(preD == "w" || preD == "s"){
+			currentD.remove("w");
+			currentD.remove("s");
+		}
+		else if(preD == "a" || preD == "d"){
+			currentD.remove("a");
+			currentD.remove("d");
+		}
+
+		for (String d : currentD) {
+			
+			Boolean isRedEnd = findNextP(red,d,maze);
+			Boolean isBlueEnd = findNextP(blue,d,maze);
+
+			if(red.nextP.equals(blue.nextP)){ ///두 구슬의 좌표가 동일하다면 
+				if(direct.get(d)[1] == 0){//행 이동인 경우
+					int vec = direct.get(d)[0];
+					if(red.r*vec < blue.r*vec){
+						red.nextP.r-=vec;
+					}
+					else{
+						blue.nextP.r-=vec;
+					}
+				}
+				else{//열 이동인 경우
+					int vec = direct.get(d)[1];
+					if(red.c*vec < blue.c*vec){
+						red.nextP.c-=vec;
+					}
+					else{
+						blue.nextP.c-=vec;
+					}
+				}
+			}
+
+		
+
+			if(isRedEnd && !isBlueEnd){ //Red만 도착
+				min = i<min? i:min;
+				break;
+			}
+		
+
+			else if(i<min && !isRedEnd && !isBlueEnd){ //둘 다 도착하지 않았다면 
+				link(red.nextP,blue.nextP,d,i+1,maze);
+			}
+		}
+		
+	}
+
+
+
+	public static void main(String[] args) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String[] input = br.readLine().split(" ");
+		int r = Integer.parseInt(input[0]);
+		int c = Integer.parseInt(input[1]);
+		Character[][] maze = new Character[r][c];
+
+
+		Point red = new Point(r,c); 
+		Point blue = new Point(r,c);
+	
+
+		for(int i = 0; i<r; i++ ){
+			String input1 = br.readLine();
+			for(int j = 0; j < c; j++){
+				maze[i][j] = input1.charAt(j);
+				switch (input1.charAt(j)){
+					case 'R':
+						red = new Point(i,j);
+						break;
+					case 'B':
+						blue = new Point(i, j);
+						break;
+					case 'O':
+						exit_r = i; exit_c = j;
+						break;
+				}
+				
+			}
+		}
+
+		min = 11;
+		link(red, blue, "_", 1,maze);
+		min = min>10? -1:min;
+		System.out.printf("%d",min);
+	}
+}

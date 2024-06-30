@@ -1,0 +1,42 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    static int n;
+    static double[] prob = new double[4];
+    static boolean[][] visited = new boolean[30][30];
+    static int[] dx = {1, -1, 0, 0}; // 동, 서, 남, 북
+    static int[] dy = {0, 0, 1, -1}; // 동, 서, 남, 북
+    static double simplePathProbability = 0.0;
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] input = br.readLine().split(" ");
+        n = Integer.parseInt(input[0]);
+        for (int i = 0; i < 4; i++) {
+            prob[i] = Integer.parseInt(input[i + 1]) / 100.0;
+        }
+
+        visited[15][15] = true; // 시작 위치를 방문으로 표시
+        dfs(15, 15, 0, 1.0);
+
+        System.out.printf("%.10f\n", simplePathProbability);
+    }
+
+    private static void dfs(int x, int y, int steps, double probability) {
+        if (steps == n) {
+            simplePathProbability += probability;
+            return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (!visited[nx][ny]) {
+                visited[nx][ny] = true;
+                dfs(nx, ny, steps + 1, probability * prob[i]);
+                visited[nx][ny] = false;
+            }
+        }
+    }
+}

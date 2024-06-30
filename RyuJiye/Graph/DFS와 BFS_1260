@@ -1,0 +1,110 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+public class Main {
+    static StringBuilder sb = new StringBuilder();
+
+    // 그래프 클래스 정의
+    private static class Graph {
+        private int numVertices; // 그래프의 정점 개수
+        private List<List<Integer>> adjList; // 인접 리스트
+
+        // 생성자: 정점 개수를 받아 그래프 초기화
+        public Graph(int numVertices) {
+            this.numVertices = numVertices;
+            adjList = new ArrayList<>(numVertices + 1); // 정점 번호를 1부터 사용
+            for (int i = 0; i <= numVertices; i++) {
+                adjList.add(new ArrayList<>());
+            }
+        }
+
+        // 간선 추가 메서드
+        public void addEdge(int source, int destination) {
+            adjList.get(source).add(destination);
+            adjList.get(destination).add(source);
+        }
+
+        // 인접 리스트 정렬 메서드
+        public void sortAdjList() {
+            for (int i = 1; i <= numVertices; i++) {
+                Collections.sort(adjList.get(i));
+            }
+        }
+
+        // DFS 탐색 메서드
+        public void dfs(int vertex, boolean[] visited) {
+            visited[vertex] = true;
+            sb.append(vertex).append(" ");
+
+            for (int neighbor : adjList.get(vertex)) {
+                if (!visited[neighbor]) {
+                    dfs(neighbor, visited);
+                }
+            }
+        }
+
+        // DFS 탐색 시작 메서드
+        public void startDfs(int startVertex) {
+            boolean[] visited = new boolean[numVertices + 1];
+            dfs(startVertex, visited);
+        }
+
+        // BFS 탐색 메서드
+        public void startBfs(int startVertex) {
+            boolean[] visited = new boolean[numVertices + 1];
+            Queue<Integer> queue = new LinkedList<>();
+
+            visited[startVertex] = true;
+            queue.offer(startVertex);
+
+            while (!queue.isEmpty()) {
+                int vertex = queue.poll();
+                sb.append(vertex).append(" ");
+
+                for (int neighbor : adjList.get(vertex)) {
+                    if (!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] input = br.readLine().split(" ");
+        int numVertices = Integer.parseInt(input[0]);
+        int numEdges = Integer.parseInt(input[1]);
+        int startVertex = Integer.parseInt(input[2]);
+
+        Graph graph = new Graph(numVertices);
+
+        // 간선 정보 입력 받기
+        for (int i = 0; i < numEdges; i++) {
+            input = br.readLine().split(" ");
+            int source = Integer.parseInt(input[0]);
+            int destination = Integer.parseInt(input[1]);
+            graph.addEdge(source, destination);
+        }
+
+        // 인접 리스트 정렬
+        graph.sortAdjList();
+
+        // DFS 탐색 결과 출력
+        graph.startDfs(startVertex);
+        sb.append("\n");
+
+        // BFS 탐색 결과 출력
+        graph.startBfs(startVertex);
+
+        // 결과 출력
+        System.out.print(sb);
+    }
+}
